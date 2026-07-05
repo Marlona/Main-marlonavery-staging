@@ -23,6 +23,24 @@ npm run check      # astro type/diagnostic check
 npm run build      # production build → dist/
 ```
 
+## Deployment flow
+
+- `main` deploys production via `.github/workflows/deploy.yml`.
+- `staging` deploys preview builds via `.github/workflows/deploy-staging.yml`.
+- Feature branches should open PRs into `staging`, then promote `staging` into `main`.
+
+## Domain cutover (Webflow -> GitHub Pages)
+
+1. In GitHub repository settings, set Pages source to **GitHub Actions**.
+2. Configure production custom domain as `marlonavery.com`.
+3. In your DNS provider, point apex `@` to GitHub Pages A records:
+   - `185.199.108.153`
+   - `185.199.109.153`
+   - `185.199.110.153`
+   - `185.199.111.153`
+4. Add `www` as a CNAME to `Marlona.github.io`.
+5. Add `staging` as a CNAME to `Marlona.github.io`.
+
 ## Editing content
 
 Add or edit files under `src/content/` — no component changes needed:
