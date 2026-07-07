@@ -164,6 +164,65 @@ export type Database = {
 					},
 				];
 			};
+			chat_conversations: {
+				Row: {
+					created_at: string | null;
+					id: string;
+					title: string;
+					updated_at: string | null;
+				};
+				Insert: {
+					created_at?: string | null;
+					id?: string;
+					title?: string;
+					updated_at?: string | null;
+				};
+				Update: {
+					created_at?: string | null;
+					id?: string;
+					title?: string;
+					updated_at?: string | null;
+				};
+				Relationships: [];
+			};
+			chat_messages: {
+				Row: {
+					content: string;
+					conversation_id: string;
+					created_at: string | null;
+					id: string;
+					model: string | null;
+					role: string;
+					tool_calls: Json | null;
+				};
+				Insert: {
+					content?: string;
+					conversation_id: string;
+					created_at?: string | null;
+					id?: string;
+					model?: string | null;
+					role: string;
+					tool_calls?: Json | null;
+				};
+				Update: {
+					content?: string;
+					conversation_id?: string;
+					created_at?: string | null;
+					id?: string;
+					model?: string | null;
+					role?: string;
+					tool_calls?: Json | null;
+				};
+				Relationships: [
+					{
+						foreignKeyName: 'chat_messages_conversation_id_fkey';
+						columns: ['conversation_id'];
+						isOneToOne: false;
+						referencedRelation: 'chat_conversations';
+						referencedColumns: ['id'];
+					},
+				];
+			};
 			daily_briefings: {
 				Row: {
 					content: string;
@@ -628,6 +687,10 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
+			get_cron_secret: {
+				Args: Record<string, never>;
+				Returns: string;
+			};
 			match_maverick_memories: {
 				Args: { query_embedding: string; match_count?: number; min_similarity?: number };
 				Returns: {

@@ -103,16 +103,17 @@ be enqueued to `approval_queue` and dispatched ONLY from a row with status `appr
 `audit_log` — enforce in the execution layer, not just UI. Phase 1 performs internal actions only
 (briefings, affirmations, review drafts).
 
-**Phase 2 is specced but NOT built — read `docs/maverick-phase2.md` before starting it.**
-Headline: /maverick home becomes a Claude/ChatGPT-style chat ("Maverick") with voice input and
-OpenRouter streaming, plus agentic tool execution — internal CRUD tools run directly; external
-actions (email sends, Stripe invoices, calendar writes) are approval-queue-gated; coding tasks
-hand off to Marlon's Claude Code via a bridge (design TBD). Also carries the original Phase 2
-items: Gmail/Calendar read mirrors, Email Center, Approval Queue UI, pg_cron scheduled briefings.
-Already live ahead of Phase 2: **Maverick's vector-store memory** — `maverick_memories` table
-(pgvector, 384-dim gte-small embeddings from the edge runtime, no external API) +
-`match_maverick_memories` RPC + `maverick-memory` edge function (remember/recall/list/forget,
-owner-gated). The chat loop consumes it in Phase 2.
+**Phase 2A is LIVE (2026-07-07); 2B/2C remain — read `docs/maverick-phase2.md` before touching.**
+The /maverick home is Maverick chat (hybrid layout): SSE streaming from the `maverick-chat` edge
+function (Sonnet 5 via OpenRouter) with an INTERNAL-only tool loop — task/project/engagement/
+revenue CRUD, vector-store memory (remember/recall), check-ins, snapshot — every execution
+audit-logged. Memory: `maverick_memories` pgvector table (384-dim gte-small from the edge
+runtime, no external API) + `match_maverick_memories` RPC + `maverick-memory` function.
+Morning briefing runs on pg_cron at 11:00 UTC (7 AM EDT; shift to 12:00 when DST ends),
+authenticated by a vault secret via `get_cron_secret()`, and lands as the first message of the
+day's conversation. `/maverick/approvals` records approve/reject decisions; **no dispatcher
+exists yet** — 2B adds Gmail/Calendar reads + email send (needs Marlon's Google OAuth), 2C adds
+Stripe invoicing + GitHub code_task handoff. External action contracts live in the spec doc.
 
 ## Content source
 

@@ -1,9 +1,30 @@
 # Maverick Phase 2 — Chat Interface + Agentic Execution
 
-> Build spec, captured 2026-07-06 from Marlon's direction. **Not built yet.** Phase 1 (dashboard,
-> briefings, affirmations, weekly reviews) shipped in PR #6. When this phase kicks off, read this
-> whole file plus the "Maverick Command Center" section of CLAUDE.md — the approval guardrail
-> there is non-negotiable and governs everything below.
+> Build spec, captured 2026-07-06 from Marlon's direction. **Phase 2A shipped 2026-07-07**
+> (chat + internal tools + approvals UI + scheduled briefing — details below). 2B/2C remain.
+> The approval guardrail in CLAUDE.md is non-negotiable and governs everything here.
+>
+> **Kickoff decisions (Marlon, 2026-07-07):** hybrid home layout (chat centerpiece, stats strip
+> + side rail stay) · invoicing targets **Stripe** · code bridge = **GitHub handoff** · briefing
+> cron at **7:00 AM ET** (`0 11 * * *` UTC — shift to `0 12` when DST ends in November).
+>
+> **✅ Built in 2A:** `maverick-chat` edge function (SSE streaming, Sonnet 5 via OpenRouter,
+> tool loop with internal tools: task/project/engagement/revenue CRUD, memory remember/recall,
+> check-ins, snapshot; audit-logged), chat_conversations/chat_messages tables, hybrid chat home,
+> Approval Queue UI (`/maverick/approvals` — decisions live, dispatchers pending), pg_cron
+> morning briefing (vault-secret auth) that seeds the briefing as the first message of each
+> day's conversation.
+>
+> **⏳ 2B (needs Marlon's Google OAuth setup):** Gmail/Calendar read mirrors, Email Center,
+> email-send dispatcher. **⏳ 2C:** Stripe invoice dispatcher + payment webhooks, GitHub
+> code-task dispatcher.
+>
+> **Approval-queue contracts for the 2B/2C dispatchers** — rows are enqueued with `action_type`
+> + `preview` and executed ONLY from status `approved`:
+> - `send_email` — preview: `{ to: string[], subject, body, reply_to? }`
+> - `create_invoice` — preview: `{ client, line_items: [{description, amount}], due_date, stripe_customer? }`
+> - `calendar_write` — preview: `{ op: create|move|cancel, event, start, end, attendees[] }`
+> - `code_task` — preview: `{ repo, title, body, branch_hint? }` → files a GitHub issue
 
 ## What Marlon asked for (in his words, lightly cleaned up)
 
