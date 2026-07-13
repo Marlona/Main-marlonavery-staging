@@ -103,6 +103,11 @@ be enqueued to `approval_queue` and dispatched ONLY from a row with status `appr
 `audit_log` — enforce in the execution layer, not just UI. Phase 1 performs internal actions only
 (briefings, affirmations, review drafts).
 
+**Elevate is LIVE (2026-07-09) — the Growth page is now the Elevate coaching engine (goals,
+validated affirmations, morning ritual, nightly adjustment loop). Read `docs/maverick-elevate.md`
+before touching anything affirmation-related; the linguistic framework and observe-don't-judge
+contract are hard rules. M4 (quadrant audits) not built.**
+
 **Phase 2A is LIVE (2026-07-07); 2B/2C remain — read `docs/maverick-phase2.md` before touching.**
 The /maverick home is Maverick chat (hybrid layout): SSE streaming from the `maverick-chat` edge
 function (Sonnet 5 via OpenRouter) with an INTERNAL-only tool loop — task/project/engagement/
