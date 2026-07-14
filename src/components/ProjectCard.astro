@@ -4,13 +4,15 @@ interface Props {
 	title: string;
 	description: string;
 	impact?: string;
+	/** e.g. "In partnership with Google" — small line under the impact */
+	partnerNote?: string;
 	tech?: string[];
 	date?: Date;
 	videoUrl?: string;
 	tone?: 'light' | 'dark';
 }
 
-const { href, title, description, impact, tech = [], date, videoUrl, tone = 'dark' } = Astro.props;
+const { href, title, description, impact, partnerNote, tech = [], date, videoUrl, tone = 'dark' } = Astro.props;
 const dateLabel = date
 	? new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(date)
 	: undefined;
@@ -28,6 +30,13 @@ const dateLabel = date
 	</div>
 	<p class:list={['mt-3 leading-relaxed', tone === 'dark' ? 'text-paper/70' : 'text-slate']}>{description}</p>
 	{impact && <p class="mt-4 text-sm font-semibold text-emerald-glow">{impact}</p>}
+	{
+		partnerNote && (
+			<p class:list={['mt-3 text-xs font-semibold tracking-wide uppercase', tone === 'dark' ? 'text-paper/60' : 'text-slate']}>
+				{partnerNote}
+			</p>
+		)
+	}
 	{
 		tech.length > 0 && (
 			<ul class="mt-6 flex flex-wrap gap-2" aria-label="Tech stack and AI models">
