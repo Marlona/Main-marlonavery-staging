@@ -288,6 +288,7 @@ import { ASSESSMENT_DIMENSIONS, ASSESSMENT_FREE_TEXT } from '../../data/elevateA
 	const fnCall = (fn: string, body: Record<string, unknown>) => invokeFn(db, fn, body);
 
 	// ------------------------------------------------------ Morning ritual --
+	const ritualSection = document.querySelector<HTMLElement>('[data-ritual]')!;
 	const ritualList = document.querySelector<HTMLElement>('[data-ritual-list]')!;
 	const ritualBtn = document.querySelector<HTMLButtonElement>('[data-ritual-read]')!;
 	const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
@@ -302,6 +303,8 @@ import { ASSESSMENT_DIMENSIONS, ASSESSMENT_FREE_TEXT } from '../../data/elevateA
 		]);
 		actives = activesRes.data ?? [];
 		const readToday = (readRes.data ?? []).length > 0;
+		// Read this morning → the card rests for the day; tomorrow brings it back.
+		ritualSection.hidden = readToday;
 		ritualList.innerHTML = actives.length
 			? actives.map((a) => `<blockquote class="font-display text-xl leading-snug font-medium md:text-2xl">“${esc(a.text)}”</blockquote>`).join('')
 			: '<p class="text-paper/60">No active set yet — hit “Let\'s start here” under Destination and Elevate builds it with you.</p>';
@@ -332,13 +335,36 @@ import { ASSESSMENT_DIMENSIONS, ASSESSMENT_FREE_TEXT } from '../../data/elevateA
 		reviseBtn.hidden = false;
 		restartBtn.hidden = false;
 		const commitment = { life_changing: 'Life-changing', sticking_point: 'Sticking point', exploring: 'Exploring' }[goal.commitment_level] ?? goal.commitment_level;
+		let visionHtml = '';
+		if (goal.vision_image_path) {
+			const { data: signed } = await db.storage.from('elevate').createSignedUrl(goal.vision_image_path, 3600);
+			if (signed?.signedUrl) {
+				visionHtml = `<img src="${esc(signed.signedUrl)}" alt="Elevate's painting of this destination" loading="lazy" class="mb-4 aspect-video w-full rounded-xl object-cover" />`;
+			}
+		}
 		el.innerHTML = `
+			${visionHtml}
 			<p class="font-display text-xl leading-snug font-medium">“${esc(goal.destination_text)}”</p>
 			<p class="mt-3 flex flex-wrap items-center gap-2 text-xs">
 				<span class="rounded-full bg-emerald-deep/40 px-2.5 py-0.5 font-bold text-emerald-glow uppercase">${esc(commitment)}</span>
 				${goal.worth_statement ? `<span class="text-paper/60">Worth: ${esc(goal.worth_statement)}</span>` : ''}
 			</p>
-			${goal.place_a_summary ? `<p class="mt-2 text-sm text-paper/60">Place A: ${esc(goal.place_a_summary)}</p>` : ''}`;
+			${goal.place_a_summary ? `<p class="mt-2 text-sm text-paper/60">Place A: ${esc(goal.place_a_summary)}</p>` : ''}
+			<button type="button" data-dest-paint class="mt-4 cursor-pointer rounded-full border border-paper/25 px-4 py-1.5 text-xs font-bold hover:border-emerald-glow hover:text-emerald-glow">${goal.vision_image_path ? 'Repaint it' : 'Paint the destination'}</button>`;
+		el.querySelector<HTMLButtonElement>('[data-dest-paint]')!.addEventListener('click', async (e) => {
+			const btn = e.currentTarget as HTMLButtonElement;
+			const label = btn.textContent;
+			btn.disabled = true;
+			btn.textContent = 'Elevate is painting… (~30s)';
+			try {
+				await fnCall('maverick-elevate', { action: 'visualize', goal_id: goal.id });
+				loadDestination();
+			} catch (err) {
+				btn.disabled = false;
+				btn.textContent = label;
+				alert(err instanceof Error ? err.message : 'Could not paint it — try again.');
+			}
+		});
 	};
 
 	// ------------------------------------------------------ Elevate noticed --

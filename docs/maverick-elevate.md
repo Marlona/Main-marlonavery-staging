@@ -29,8 +29,12 @@ or negation-of-negative · his vocabulary. Enforced by `validateAffirmation()` i
 
 - **`maverick-elevate` edge function** (owner JWT or cron secret): `generate` (seed-then-shape,
   validator-gated, active set capped at 5), `adjust` (nightly signal loop), `resolve_event`
-  (executes accepted proposals). Nightly cron `maverick-elevate-adjust` at `30 8 * * *` UTC
-  (4:30 AM ET).
+  (executes accepted proposals), `rewrite` (dictation cleanup of the goal — his words kept,
+  original archived to audit_log by the caller when needed), `visualize` (paints Place B →
+  storage bucket `elevate` at `vision/{goal_id}`, sets `goals.vision_image_path`). Nightly cron
+  `maverick-elevate-adjust` at `30 8 * * *` UTC (4:30 AM ET). Model profiles (env-overridable):
+  `MODEL_REASONING`/`MODEL_WRITING` (Claude Sonnet 5), `MODEL_REWRITE` (google/gemini-3.5-flash),
+  `MODEL_IMAGE` (google/gemini-3.1-flash-image).
 - **maverick-chat** carries the methodology in its system prompt + tools: `declare_goal`
   (asks "what is this worth to you?"), `capture_self_talk`, `generate_affirmations` (delegates
   to maverick-elevate server-to-server via the cron secret), `log_affirmation_checkin`.
@@ -38,10 +42,12 @@ or negation-of-negative · his vocabulary. Enforced by `validateAffirmation()` i
   `self_talk_samples`, `affirmation_checkins` (morning/evening/weekly/…), `agent_events`
   (proposals), plus Elevate columns on `affirmations` (goal_id, target, version,
   parent_affirmation_id, status: active|reshaped|internalized|retired, user_seed_text).
-- **UI**: Growth page = ritual card, destination, active set + resonance strip, "Elevate
+- **UI**: Growth page = ritual card, destination (with Elevate's painted vision image via signed
+  URL + a "Paint the destination" button when missing), active set + resonance strip, "Elevate
   noticed" proposal cards (Accept/Dismiss), assessment form + delta bars, evening check-in,
-  journey lineage. Home side rail = compact ritual + one-tap evening resonance.
-  `/maverick?ask=…` prefills the chat composer for deep-linked coaching prompts.
+  journey lineage. Home side rail = compact ritual + one-tap evening resonance. **The morning
+  ritual card disappears for the day once marked read (both surfaces) and returns the next
+  morning.** `/maverick?ask=…` prefills the chat composer for deep-linked coaching prompts.
 - **Onboarding wizard** (added 2026-07-15): "Let's start here →" on the empty destination card
   opens a 12-step dialog on the Growth page — destination, worth, commitment, Place A, the
   assessment in three themed cards, the three story questions, optional seed phrases, then a
@@ -49,8 +55,10 @@ or negation-of-negative · his vocabulary. Enforced by `validateAffirmation()` i
   mic (Web Speech dictation, `src/lib/maverick/dictation.ts`; hidden where unsupported).
   **Saves as it goes, executes at the end**: answers autosave into the single `elevate_drafts`
   row (survives refresh/devices), but `goals`/`assessments` are written — and the set generated —
-  only at "Build my set"; the draft row is then deleted. "Start over" on a declared destination
-  reruns the wizard and marks the old goal `revised`. Chat remains the coaching/revision surface.
+  only at "Build my set"; the execute chain is goal insert → `rewrite` (dictation cleanup) →
+  `visualize` fired in parallel → assessment insert → `generate` → draft row deleted. "Start
+  over" on a declared destination reruns the wizard and marks the old goal `revised`. Chat
+  remains the coaching/revision surface.
 
 ## Signal table (adjust loop — events carry proposals; nothing changes without Accept)
 

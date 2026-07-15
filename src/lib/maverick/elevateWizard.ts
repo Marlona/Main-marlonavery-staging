@@ -255,6 +255,15 @@ export function initElevateWizard(db: DB, { onComplete }: { onComplete: () => vo
 				if (error) throw new Error(error.message);
 				state.goal_id = data.id;
 				await persist(); // a retry must never double-insert
+				// Clean the dictation before the set is generated (generate reads the
+				// goal row) — his words kept, artifacts out. Never blocks the set.
+				try {
+					await invokeFn(db, 'maverick-elevate', { action: 'rewrite', goal_id: state.goal_id });
+				} catch {
+					/* raw words still work */
+				}
+				// Paint Place B while the set writes; it lands on the Destination card.
+				void invokeFn(db, 'maverick-elevate', { action: 'visualize', goal_id: state.goal_id }).catch(() => {});
 			}
 			if (!state.assessment_id) {
 				const scored: Record<string, { a: number; b: number; comfort: number }> = {};

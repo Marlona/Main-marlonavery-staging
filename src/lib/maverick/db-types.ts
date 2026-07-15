@@ -572,6 +572,7 @@ export type Database = {
 					place_a_summary: string | null;
 					revised_at: string | null;
 					status: string;
+					vision_image_path: string | null;
 					worth_statement: string | null;
 				};
 				Insert: {
@@ -582,6 +583,7 @@ export type Database = {
 					place_a_summary?: string | null;
 					revised_at?: string | null;
 					status?: string;
+					vision_image_path?: string | null;
 					worth_statement?: string | null;
 				};
 				Update: {
@@ -592,6 +594,7 @@ export type Database = {
 					place_a_summary?: string | null;
 					revised_at?: string | null;
 					status?: string;
+					vision_image_path?: string | null;
 					worth_statement?: string | null;
 				};
 				Relationships: [];
